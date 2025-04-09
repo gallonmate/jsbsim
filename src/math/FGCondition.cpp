@@ -65,7 +65,9 @@ FGCondition::FGCondition(Element* element, std::shared_ptr<FGPropertyManager> Pr
     if (logic == "OR") Logic = eOR;
     else if (logic == "AND") Logic = eAND;
     else { // error
-      throw BaseException("FGCondition: unrecognized LOGIC token:'" + logic + "'");
+      cerr << element->ReadFrom()
+           << "Unrecognized LOGIC token " << logic << endl;
+      throw BaseException("FGCondition: unrecognized logic value:'" + logic + "'");
     }
   } else {
     Logic = eAND; // default
@@ -85,14 +87,21 @@ FGCondition::FGCondition(Element* element, std::shared_ptr<FGPropertyManager> Pr
     string tagName = condition_element->GetName();
 
     if (tagName != elName) {
-      throw BaseException("FGCondition: unrecognized TAG:'" + tagName + "' in the condition statement.");
+      cerr << condition_element->ReadFrom()
+           << "Unrecognized tag <" << tagName << "> in the condition statement."
+           << endl;
+      throw BaseException("FGCondition: unrecognized tag:'" + tagName + "'");
     }
 
     conditions.push_back(make_shared<FGCondition>(condition_element, PropertyManager));
     condition_element = element->GetNextElement();
   }
 
-  if (conditions.empty()) throw BaseException("Empty conditional");
+  if (conditions.empty()) {
+    cerr << element->ReadFrom()
+         << "Empty conditional" << endl;
+    throw BaseException("Empty conditional");
+  }
 
   Debug(0);
 }
@@ -134,11 +143,11 @@ FGCondition::FGCondition(const string& test, std::shared_ptr<FGPropertyManager> 
     conditional = test_strings[1];
     TestParam2 = new FGParameterValue(test_strings[2], PropertyManager, el);
   } else {
-    ostringstream s;
-    s << "  Conditional test is invalid: \"" << test
-      << "\" has " << test_strings.size() << " elements in the "
-      << "test condition.\n";
-    throw BaseException(s.str());
+    cerr << el->ReadFrom()
+         << "  Conditional test is invalid: \"" << test
+         << "\" has " << test_strings.size() << " elements in the "
+         << "test condition." << endl;
+    throw BaseException("FGCondition: incorrect number of test elements:" + std::to_string(test_strings.size()));
   }
 
   assert(Comparison == ecUndef);
@@ -157,7 +166,7 @@ FGCondition::FGCondition(const string& test, std::shared_ptr<FGPropertyManager> 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-bool FGCondition::Evaluate(void) const
+bool FGCondition::Evaluate(void )
 {
   bool pass = false;
 
@@ -213,7 +222,7 @@ bool FGCondition::Evaluate(void) const
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void FGCondition::PrintCondition(string indent) const
+void FGCondition::PrintCondition(string indent)
 {
   string scratch;
 

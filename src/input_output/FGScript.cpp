@@ -241,12 +241,11 @@ bool FGScript::LoadScript(const SGPath& script, double default_dT,
 
     // Process the conditions
     Element* condition_element = event_element->FindElement("condition");
-    if (condition_element) {
+    if (condition_element != 0) {
       try {
         newCondition = new FGCondition(condition_element, PropertyManager);
-      } catch(BaseException& e) {
-        cerr << condition_element->ReadFrom()
-             << fgred << e.what() << reset << endl << endl;
+      } catch(string& str) {
+        cout << endl << fgred << str << reset << endl << endl;
         delete newEvent;
         return false;
       }

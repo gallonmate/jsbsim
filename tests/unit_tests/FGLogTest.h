@@ -39,6 +39,7 @@ void testConstructor() {
   TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
 
   JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
+  TS_ASSERT(log.str().empty());
   TS_ASSERT(!logger->flushed);
   TS_ASSERT(logger->buffer.empty());
   TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
@@ -48,13 +49,11 @@ void testDestructor() {
   auto logger = std::make_shared<DummyLogger>();
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
+    TS_ASSERT(log.str().empty());
     TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->buffer.empty());
   TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testCharMessage() {
@@ -63,13 +62,12 @@ void testCharMessage() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log <<message;
+    TS_ASSERT_EQUALS(log.str(), message);
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, message);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testStringMessage() {
@@ -78,13 +76,12 @@ void testStringMessage() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << message;
+    TS_ASSERT_EQUALS(log.str(), message);
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, message);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testConcatenatedMessages() {
@@ -94,13 +91,12 @@ void testConcatenatedMessages() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << message1 << " " << message2;
+    TS_ASSERT_EQUALS(log.str(), message1 + " " + message2);
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, message1 + " " + message2);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testEndl() {
@@ -108,13 +104,12 @@ void testEndl() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << "Hello" << std::endl << "World!";
+    TS_ASSERT_EQUALS(log.str(), "Hello\nWorld!");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "Hello\nWorld!");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testNumbers() {
@@ -122,13 +117,12 @@ void testNumbers() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << 1 << 2.1 << -3.4f;
+    TS_ASSERT_EQUALS(log.str(), "12.1-3.4");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "12.1-3.4");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testSetPrecision() {
@@ -136,13 +130,12 @@ void testSetPrecision() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << std::setprecision(3) << 1.23456789;
+    TS_ASSERT_EQUALS(log.str(), "1.23");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "1.23");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testSetWidthRight() {
@@ -150,13 +143,12 @@ void testSetWidthRight() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << std::setw(5) << 123;
+    TS_ASSERT_EQUALS(log.str(), "  123");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "  123");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testSetWidthLeft() {
@@ -164,13 +156,12 @@ void testSetWidthLeft() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << std::left << std::setw(5) << 123;
+    TS_ASSERT_EQUALS(log.str(), "123  ");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "123  ");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testPath() {
@@ -179,13 +170,12 @@ void testPath() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << (path/"file");
+    TS_ASSERT_EQUALS(log.str(), "Path \"path/to/file\"");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "Path \"path/to/file\"");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testColumnVector3() {
@@ -194,13 +184,12 @@ void testColumnVector3() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << vec;
+    TS_ASSERT_EQUALS(log.str(), "1 , 2 , 3");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "1 , 2 , 3");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testFormatOnly() {
@@ -210,13 +199,12 @@ void testFormatOnly() {
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
     log << JSBSim::LogFormat::NORMAL;
+    TS_ASSERT(log.str().empty());
     TS_ASSERT(!logger->flushed);
     TS_ASSERT_EQUALS(logger->buffer, "NORMAL");
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "NORMAL");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testClosingFormat() {
@@ -224,17 +212,16 @@ void testClosingFormat() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << "Hello,";
+    TS_ASSERT_EQUALS(log.str(), "Hello,");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
     log << JSBSim::LogFormat::NORMAL;
+    TS_ASSERT(log.str().empty());
     TS_ASSERT(!logger->flushed);
     TS_ASSERT_EQUALS(logger->buffer, "Hello,NORMAL");
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "Hello,NORMAL");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testMidFormat() {
@@ -242,21 +229,20 @@ void testMidFormat() {
   {
     JSBSim::FGLogging log(logger, JSBSim::LogLevel::INFO);
     log << "Hello,";
+    TS_ASSERT_EQUALS(log.str(), "Hello,");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
     log << JSBSim::LogFormat::NORMAL;
+    TS_ASSERT(log.str().empty());
     TS_ASSERT(!logger->flushed);
     TS_ASSERT_EQUALS(logger->buffer, "Hello,NORMAL");
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
     log << " World!";
+    TS_ASSERT_EQUALS(log.str(), " World!");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT_EQUALS(logger->buffer, "Hello,NORMAL");
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "Hello,NORMAL World!");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::INFO);
 }
 
 void testXMLLogging() {
@@ -266,13 +252,13 @@ void testXMLLogging() {
   el.SetLineNumber(42);
   {
     JSBSim::FGXMLLogging log(logger, &el, JSBSim::LogLevel::DEBUG);
+    TS_ASSERT(log.str().empty());
     TS_ASSERT_EQUALS(logger->buffer, "file.xml:42");
     TS_ASSERT(!logger->flushed);
     TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::DEBUG);
   }
   TS_ASSERT(logger->flushed);
   TS_ASSERT_EQUALS(logger->buffer, "file.xml:42");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::DEBUG);
 }
 };
 
@@ -426,329 +412,5 @@ void testDefaultFormat() {
   }
   std::cout.rdbuf(cout_buffer);
   TS_ASSERT_EQUALS(buffer.str(), "\033[39mHello, World!\033[0m");
-}
-};
-
-class LogExceptionTest : public CxxTest::TestSuite
-{
-public:
-void testConstructor() {
-  auto logger = std::make_shared<DummyLogger>();
-  JSBSim::LogException logException(logger);
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testDestructor() {
-  auto logger = std::make_shared<DummyLogger>();
-  {
-    JSBSim::LogException logException(logger);
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testThrow() {
-  auto logger = std::make_shared<DummyLogger>();
-  try {
-    JSBSim::LogException logException(logger);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testThrowEmptyMessage() {
-  auto logger = std::make_shared<DummyLogger>();
-  try {
-    JSBSim::LogException logException(logger);
-    logException << "";
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testThrowWithMessage() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message = "Hello, World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << message;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, message);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testThrowConcatenatedMessages1() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message1 = "Hello";
-  std::string message2 = ", World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << message1 << message2;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, message1 + message2);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testThrowConcatenatedMessages2() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message1 = "Hello";
-  std::string message2 = ", World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << message1;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    logException << message2;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, message1 + message2);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testThrowFormattedMessages1() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message = "Hello, World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << JSBSim::LogFormat::NORMAL << message;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, "NORMAL" + message);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testThrowFormattedMessages2() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message = "Hello, World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << JSBSim::LogFormat::NORMAL;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    logException << message;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, "NORMAL" + message);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testThrowFormattedMessages3() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message1 = "Hello";
-  std::string message2 = ", World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << message1 << JSBSim::LogFormat::NORMAL << message2;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (const JSBSim::BaseException& e) {
-    TS_ASSERT_EQUALS(std::string(e.what()), message1 + message2);
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, message1 + "NORMAL" + message2);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testThrowAndAppendMessage() {
-  auto logger = std::make_shared<DummyLogger>();
-  std::string message1 = "Hello";
-  std::string message2 = ", World!";
-  try {
-    JSBSim::LogException logException(logger);
-    logException << message1;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::LogException& e) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    e << message2;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, message1 + message2);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-};
-
-class testXMLLogException : public CxxTest::TestSuite
-{
-public:
-void testConstructor() {
-  auto logger = std::make_shared<DummyLogger>();
-  JSBSim::Element el("element");
-  el.SetFileName("file.xml");
-  el.SetLineNumber(42);
-  JSBSim::XMLLogException logException(logger, &el);
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testThrow() {
-  auto logger = std::make_shared<DummyLogger>();
-  JSBSim::Element el("element");
-  el.SetFileName("file.xml");
-  el.SetLineNumber(42);
-  try {
-    JSBSim::XMLLogException logException(logger, &el);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testEmptyMessage() {
-  auto logger = std::make_shared<DummyLogger>();
-  JSBSim::Element el("element");
-  el.SetFileName("file.xml");
-  el.SetLineNumber(42);
-  try {
-    JSBSim::XMLLogException logException(logger, &el);
-    logException << "";
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(!logger->flushed);
-  TS_ASSERT(logger->buffer.empty());
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-}
-
-void testWithMessage() {
-  auto logger = std::make_shared<DummyLogger>();
-  JSBSim::Element el("element");
-  el.SetFileName("file.xml");
-  el.SetLineNumber(42);
-  std::string message = "Hello, World!";
-  try {
-    JSBSim::XMLLogException logException(logger, &el);
-    logException << message;
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-    throw logException;
-  } catch (JSBSim::BaseException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, "file.xml:42" + message);
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
-}
-
-void testPromoteLogException() {
-  auto logger = std::make_shared<DummyLogger>();
-  JSBSim::Element el("element");
-  el.SetFileName("file.xml");
-  el.SetLineNumber(42);
-  try {
-    try {
-      JSBSim::LogException logException(logger);
-      logException << "Hello, World!";
-      TS_ASSERT(!logger->flushed);
-      TS_ASSERT(logger->buffer.empty());
-      TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-      throw logException;
-    } catch (JSBSim::LogException& e) {
-      JSBSim::XMLLogException logException(e, &el);
-      TS_ASSERT(!logger->flushed);
-      TS_ASSERT(logger->buffer.empty());
-      TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-      throw logException;
-    }
-  } catch (JSBSim::LogException&) {
-    TS_ASSERT(!logger->flushed);
-    TS_ASSERT(logger->buffer.empty());
-    TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::BULK);
-  }
-  TS_ASSERT(logger->flushed);
-  TS_ASSERT_EQUALS(logger->buffer, "file.xml:42Hello, World!");
-  TS_ASSERT_EQUALS(logger->GetLogLevel(), JSBSim::LogLevel::FATAL);
 }
 };

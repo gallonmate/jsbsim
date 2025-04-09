@@ -63,36 +63,23 @@ FGDistributor::FGDistributor(FGFCS* fcs, Element* element)
   if (type_string == "inclusive") Type = eInclusive;
   else if (type_string == "exclusive") Type = eExclusive;
   else {
-    XMLLogException err(fcs->GetExec()->GetLogger(), element);
-    err << "Distributor type should be \"inclusive\" or \"exclusive\""
-        << " but got \"" << type_string << "\" instead.\n";
-    throw err;
+    throw("Not a known Distributor type, "+type_string);
   }
 
   Element* case_element = element->FindElement("case");
   while (case_element) {
-    auto current_case = make_unique<Case>();
+    Case* current_case = new Case;
     Element* test_element = case_element->FindElement("test");
-    try {
-      if (test_element) current_case->SetTest(test_element, PropertyManager);
-    } catch (XMLLogException&) {
-      throw;
-    } catch (LogException& e) {
-      throw XMLLogException(e, test_element);
-    } catch (const BaseException& e) {
-      XMLLogException err(fcs->GetExec()->GetLogger(), test_element);
-      err << LogFormat::RED << e.what() << LogFormat::RESET << "\n\n";
-      throw err;
-    }
+    if (test_element) current_case->SetTest(new FGCondition(test_element, PropertyManager));
     Element* prop_val_element = case_element->FindElement("property");
     while (prop_val_element) {
       string value_string = prop_val_element->GetAttributeValue("value");
       string property_string = prop_val_element->GetDataLine();
-      current_case->AddPropValPair(property_string, value_string, PropertyManager,
-                                   prop_val_element);
+      current_case->AddPropValPair(new PropValPair(property_string, value_string,
+                                                   PropertyManager, prop_val_element));
       prop_val_element = case_element->FindNextElement("property");
     }
-    Cases.push_back(std::move(current_case));
+    Cases.push_back(current_case);
     case_element = element->FindNextElement("case");
   }
 
@@ -101,10 +88,18 @@ FGDistributor::FGDistributor(FGFCS* fcs, Element* element)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+FGDistributor::~FGDistributor()
+{
+  for (auto Case: Cases) delete Case;
+  Debug(1);
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 bool FGDistributor::Run(void )
 {
   bool completed = false;
-  for (auto& Case: Cases) { // Loop through all Cases
+  for (auto Case: Cases) { // Loop through all Cases
     if (Case->HasTest()) {
       if (Case->GetTestResult() && !((Type == eExclusive) && completed)) {
         Case->SetPropValPairs();
@@ -145,19 +140,19 @@ void FGDistributor::Debug(int from)
     if (from == 0) { // Constructor
       FGLogging log(fcs->GetExec()->GetLogger(), LogLevel::DEBUG);
       unsigned int ctr=0;
-      for (const auto& Case: Cases) {
+      for (auto Case: Cases) {
         log << "      Case: " << fixed << ctr << "\n";
         if (Case->HasTest()) {
-          Case->GetTest().PrintCondition("        ");
+          Case->GetTest()->PrintCondition("        ");
         } else {
           log << "        Set these properties by default: \n";
         }
         log << "\n";
-        for (const auto& propVal: *Case) {
-          log << "        Set property " << propVal->GetPropName();
-          if (propVal->GetLateBoundProp()) log << " (late bound)";
-          log << " to " << propVal->GetValString();
-          if (propVal->GetLateBoundValue()) log << " (late bound)";
+        for (auto propVal = Case->IterPropValPairs(); propVal != Case->EndPropValPairs(); ++propVal) {
+          log << "        Set property " << (*propVal)->GetPropName();
+          if ((*propVal)->GetLateBoundProp()) log << " (late bound)";
+          log << " to " << (*propVal)->GetValString();
+          if ((*propVal)->GetLateBoundValue()) log << " (late bound)";
           log << "\n";
         }
         ctr++;

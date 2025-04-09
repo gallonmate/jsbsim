@@ -232,10 +232,10 @@ bool FGAerodynamics::Run(bool Holding)
     break;
   default:
     {
-      LogException err(FDMExec->GetLogger());
-      err << "\n  A proper axis type has NOT been selected. Check "
+      FGLogging log(FDMExec->GetLogger(), LogLevel::DEBUG);
+      log << "\n  A proper axis type has NOT been selected. Check "
           << "your aerodynamics definition.\n";
-      throw err;
+      throw BaseException(log.str());
     }
   }
   // Calculate aerodynamic reference point shift, if any. The shift takes place
@@ -278,10 +278,10 @@ bool FGAerodynamics::Run(bool Holding)
     break;
   default:
     {
-      LogException err(FDMExec->GetLogger());
-      err << "\n  A proper axis type has NOT been selected. Check "
+      FGLogging log(FDMExec->GetLogger(), LogLevel::DEBUG);
+      log << "\n  A proper axis type has NOT been selected. Check "
           << "your aerodynamics definition.\n";
-      throw err;
+      throw BaseException(log.str());
     }
   }
 
@@ -471,10 +471,10 @@ void FGAerodynamics::DetermineAxisSystem(Element* document)
             << " aircraft config file. (NORMAL AXIAL)\n";
       }
     } else { // error
-      XMLLogException err(FDMExec->GetLogger(), axis_element);
-      err << "\n  An unknown axis type, " << axis << " has been specified"
+      FGXMLLogging log(FDMExec->GetLogger(), axis_element, LogLevel::FATAL);
+      log << "\n  An unknown axis type, " << axis << " has been specified"
           << " in the aircraft configuration file.\n";
-      throw err;
+      throw BaseException(log.str());
     }
     axis_element = document->FindNextElement("axis");
   }
@@ -524,9 +524,9 @@ void FGAerodynamics::ProcessAxesNameAndFrame(eAxisType& axisType, const string& 
     }
   }
   else {
-    XMLLogException err(FDMExec->GetLogger(), el);
-    err << "\n Unknown axis frame type of - " << frame << "\n";
-    throw err;
+    FGXMLLogging log(FDMExec->GetLogger(), el, LogLevel::FATAL);
+    log << "\n Unknown axis frame type of - " << frame << "\n";
+    throw BaseException(log.str());
   }
 }
 

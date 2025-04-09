@@ -53,7 +53,7 @@ CLASS DOCUMENTATION
 
 /** Encapsulates a distributor for the flight control system.
 
-The distributor component models a distributor -
+The distributor component models a distributor - 
 
 Within a test, additional tests can be specified, which allows for
 complex groupings of logical comparisons. Each test contains
@@ -131,6 +131,9 @@ public:
              that represents this distributor component */
   FGDistributor(FGFCS* fcs, Element* element);
 
+  /// Destructor
+  ~FGDistributor();
+
   /** Executes the distributor logic.
       @return true - always*/
   bool Run(void) override;
@@ -138,7 +141,6 @@ public:
 private:
 
   enum eType {eInclusive=0, eExclusive} Type;
-  template<typename T> using vector_of_unique_ptr = std::vector<std::unique_ptr<T>>;
 
   class PropValPair {
   public:
@@ -152,14 +154,15 @@ private:
         Prop->SetValue(Val->GetValue());
       }
       catch(...) {
-        throw BaseException(Prop->GetName()+" in distributor component is not known");
+        throw(Prop->GetName()+" in distributor component is not known");
       }
     }
 
-    std::string GetPropName() const { return Prop->GetName(); }
-    std::string GetValString() const { return Val->GetName(); }
-    bool GetLateBoundProp() const { return Prop->IsLateBound(); }
-    bool GetLateBoundValue() const { return Val->IsLateBound(); }
+    std::string GetPropName() { return Prop->GetName(); }
+    std::string GetValString() { return Val->GetName(); }
+    bool GetLateBoundProp() { return Prop->IsLateBound(); }
+    bool GetLateBoundValue() {return Val->IsLateBound();
+    }
   private:
     FGPropertyValue_ptr Prop;
     FGParameterValue_ptr Val;
@@ -169,30 +172,29 @@ private:
   public:
     Case() : Test(nullptr) {}
 
-    void SetTest(Element* test_element, std::shared_ptr<FGPropertyManager> propMan) {
-      Test = std::make_unique<FGCondition>(test_element, propMan);
+    ~Case() {
+      for (auto pair: PropValPairs) delete pair;
     }
-    const FGCondition& GetTest(void) const noexcept { return *Test; }
-    void AddPropValPair(const std::string& property, const std::string& value,
-                        std::shared_ptr<FGPropertyManager> propManager, Element* prop_val_el) {
-      PropValPairs.push_back(std::make_unique<PropValPair>(property, value, propManager, prop_val_el));
-    }
+
+    void SetTest(FGCondition* test) {Test = test;}
+    FGCondition* GetTest(void) {return Test;}
+    void AddPropValPair(PropValPair* pvPair) {PropValPairs.push_back(pvPair);}
     void SetPropValPairs() {
-      for (auto& pair: PropValPairs) pair->SetPropToValue();
+      for (auto pair: PropValPairs) pair->SetPropToValue();
     }
-    vector_of_unique_ptr<PropValPair>::const_iterator begin(void) const
+    std::vector<PropValPair*>::const_iterator IterPropValPairs(void) const
     { return PropValPairs.cbegin(); }
-    vector_of_unique_ptr<PropValPair>::const_iterator end(void) const
+    std::vector<PropValPair*>::const_iterator EndPropValPairs(void) const
     { return PropValPairs.cend(); }
-    bool HasTest() const noexcept { return Test != nullptr; }
-    bool GetTestResult() const { return Test->Evaluate(); }
+    bool HasTest() {return Test != nullptr;}
+    bool GetTestResult() { return Test->Evaluate(); }
 
   private:
-    std::unique_ptr<FGCondition> Test;
-    vector_of_unique_ptr<PropValPair> PropValPairs;
+    FGCondition* Test;
+    std::vector <PropValPair*> PropValPairs;
   };
 
-  vector_of_unique_ptr<Case> Cases;
+  std::vector <Case*> Cases;
 
   void Debug(int from) override;
 };

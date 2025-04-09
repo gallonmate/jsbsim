@@ -516,12 +516,12 @@ bool FGFCS::Load(Element* document)
     if (sOnOffProperty.length() > 0) {
       FGPropertyNode* OnOffPropertyNode = PropertyManager->GetNode(sOnOffProperty);
       if (OnOffPropertyNode == nullptr) {
-        XMLLogException err(FDMExec->GetLogger(), channel_element);
-        err << LogFormat::BOLD << LogFormat::RED
+        FGXMLLogging log(FDMExec->GetLogger(), channel_element, LogLevel::FATAL);
+        log << LogFormat::BOLD << LogFormat::RED
             << "The On/Off property, " << sOnOffProperty << " specified for channel "
             << channel_element->GetAttributeValue("name") << " is undefined or not "
             << "understood. The simulation will abort" << LogFormat::RESET << endl;
-        throw err;
+        throw BaseException(log.str());
       } else
         newChannel = new FGFCSChannel(this, sChannelName, ChannelRate,
                                       OnOffPropertyNode);
@@ -566,10 +566,10 @@ bool FGFCS::Load(Element* document)
           // <integrator> is equivalent to <pid type="trap">
           Element* c1_el = component_element->FindElement("c1");
           if (!c1_el) {
-            XMLLogException err(FDMExec->GetLogger(), component_element);
-            err << "INTEGRATOR component " << component_element->GetAttributeValue("name")
+            FGXMLLogging log(FDMExec->GetLogger(), component_element, LogLevel::FATAL);
+            log << "INTEGRATOR component " << component_element->GetAttributeValue("name")
                 << " does not provide the parameter <c1>" << endl;
-            throw err;
+            throw BaseException(log.str());
           }
           c1_el->ChangeName("ki");
           if (!c1_el->HasAttribute("type"))

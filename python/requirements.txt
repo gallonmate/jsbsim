@@ -4,4 +4,3 @@ cython
 pandas
 scipy
 setuptools>=60.0.0
-telnetlib3

@@ -68,8 +68,8 @@ public:
   FGCondition(const std::string& test, std::shared_ptr<FGPropertyManager> PropertyManager,
               Element* el);
 
-  bool Evaluate(void) const;
-  void PrintCondition(std::string indent="  ") const;
+  bool Evaluate(void);
+  void PrintCondition(std::string indent="  ");
 
 private:
 

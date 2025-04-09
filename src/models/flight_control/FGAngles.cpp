@@ -100,9 +100,7 @@ FGAngles::FGAngles(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
       }
     }
   } else {
-    XMLLogException err(fcs->GetExec()->GetLogger(), element);
-    err << "Target angle is required for Angles component: " << Name << "\n";
-    throw err;
+    throw("Target angle is required for component: "+Name);
   }
 
   if (element->FindElement("source_angle") ) {
@@ -113,20 +111,14 @@ FGAngles::FGAngles(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
       }
     }
   } else {
-    XMLLogException err(fcs->GetExec()->GetLogger(), element);
-    err << "Source angle is required for Angles component: " << Name << "\n";
-    throw err;
+    throw("Source latitude is required for Angles component: "+Name);
   }
 
   unit = element->GetAttributeValue("unit");
   if (!unit.empty()) {
     if      (unit == "DEG") output_unit = 180.0/M_PI;
     else if (unit == "RAD") output_unit = 1.0;
-    else {
-      XMLLogException err(fcs->GetExec()->GetLogger(), element);
-      err << "Unknown unit " << unit << " in angle component, " << Name << "\n";
-      throw err;
-    }
+    else throw("Unknown unit "+unit+" in angle component, "+Name);
   } else {
     output_unit = 1.0; // Default is radians (1.0) if unspecified
   }

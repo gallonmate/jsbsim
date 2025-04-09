@@ -318,9 +318,7 @@ void FGPropulsion::InitRunning(int n)
   if (n >= 0) { // A specific engine is supposed to be initialized
 
     if (n >= (int)GetNumEngines() ) {
-      LogException err(FDMExec->GetLogger());
-      err << "Tried to initialize a non-existent engine!";
-      throw err;
+      throw(string("Tried to initialize a non-existent engine!"));
     }
 
     in.ThrottleCmd[n] = in.ThrottlePos[n] = 1; // Set the throttle command and position
@@ -386,16 +384,8 @@ bool FGPropulsion::Load(Element* el)
     try {
       // Locate the thruster definition
       Element* thruster_element = engine_element->FindElement("thruster");
-      if (!thruster_element) {
-        XMLLogException err(FDMExec->GetLogger(), engine_element);
-        err << "No thruster definition supplied with engine definition.";
-        throw err;
-      }
-      if (!ModelLoader.Open(thruster_element)) {
-        XMLLogException err(FDMExec->GetLogger(), thruster_element);
-        err << "Cannot open the thruster element.";
-        throw err;
-      }
+      if (!thruster_element || !ModelLoader.Open(thruster_element))
+        throw("No thruster definition supplied with engine definition.");
 
       if (engine_element->FindElement("piston_engine")) {
         Element *element = engine_element->FindElement("piston_engine");
@@ -421,17 +411,9 @@ bool FGPropulsion::Load(Element* el)
         log << " Unknown engine type\n";
         return false;
       }
-    } catch (XMLLogException& err) {
-      err << "Cannot load " << Name << "\n";
-      return false;
-    } catch (LogException& e) {
-      XMLLogException err(e, engine_element);
-      err << "Cannot load " << Name << "\n";
-      return false;
-    } catch (const BaseException& e) {
-      FGXMLLogging err(FDMExec->GetLogger(), engine_element, LogLevel::FATAL);
-      err << "\n" << LogFormat::RED << e.what() << LogFormat::RESET
-          << "\nCannot load " << Name << "\n";
+    } catch (std::string& str) {
+      FGXMLLogging log(FDMExec->GetLogger(), engine_element, LogLevel::ERROR);
+      log << "\n" << LogFormat::RED << str << LogFormat::RESET << "\n";
       return false;
     }
 
